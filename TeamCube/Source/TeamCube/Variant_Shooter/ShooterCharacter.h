@@ -55,6 +55,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Health")
 	float MaxHP = 500.0f;
 
+	// Edited by Jeremy near project start to spawn in with a weapon for now
+	UPROPERTY(EditDefaultsOnly, category="Weapons")
+	TSubclassOf<AShooterWeapon> DefaultWeaponClass;
+
 	/** Current HP remaining to this character */
 	float CurrentHP = 0.0f;
 

@@ -31,6 +31,13 @@ void AShooterCharacter::BeginPlay()
 
 	// update the HUD
 	OnDamaged.Broadcast(1.0f);
+
+
+	// JPH added for now, I think we can alter the gun logic for firing and stuff to handle placing towers
+	if (DefaultWeaponClass)
+	{
+		AddWeaponClass(DefaultWeaponClass);
+	}
 }
 
 void AShooterCharacter::EndPlay(EEndPlayReason::Type EndPlayReason)
