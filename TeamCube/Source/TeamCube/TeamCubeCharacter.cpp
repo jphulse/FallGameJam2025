@@ -50,6 +50,12 @@ ATeamCubeCharacter::ATeamCubeCharacter()
 	// Configure character movement
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
+
+	// New
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	GetCapsuleComponent()->SetUsingAbsoluteRotation(true);
+
 }
 
 void ATeamCubeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -135,11 +141,16 @@ void ATeamCubeCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController())
 	{
+		FVector ForwardDir = GetActorForwardVector();
+		FVector RightDir = GetActorRightVector();
+
+		AddMovementInput(ForwardDir, Forward);
+		AddMovementInput(RightDir, Right);
 
 
 		// pass the move inputs
-		AddMovementInput(GetActorRightVector(), Right);
-		AddMovementInput(GetActorForwardVector(), Forward);
+		/*AddMovementInput(GetActorRightVector(), Right);
+		AddMovementInput(GetActorForwardVector(), Forward);*/
 	}
 }
 
@@ -152,7 +163,11 @@ void ATeamCubeCharacter::DoJumpStart()
 void ATeamCubeCharacter::DoJumpEnd()
 {
 	// pass StopJumping to the character
-	StopJumping();
+	if (!GetCharacterMovement()->IsFalling())
+	{
+		FVector JumpDir = GetActorUpVector(); // Character's local up
+		GetCharacterMovement()->Velocity += JumpDir * JumpStrength;
+	}
 }
 
 void ATeamCubeCharacter::UpdateCamera(FRotator target)
@@ -161,6 +176,8 @@ void ATeamCubeCharacter::UpdateCamera(FRotator target)
 	//target.Yaw += 180.f;
 
 	CameraRoot->SetWorldRotation(target);
+	FirstPersonCameraComponent->SetWorldRotation(target);
+
 
 	// Get the player's world up vector
 	FVector PlayerUp = GetActorUpVector();

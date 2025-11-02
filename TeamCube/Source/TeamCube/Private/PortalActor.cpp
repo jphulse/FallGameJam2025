@@ -2,6 +2,7 @@
 
 #include "PortalActor.h"
 #include "TeamCubeCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
@@ -46,49 +47,87 @@ void APortalActor::Tick(float DeltaTime)
 }
 
 void APortalActor::TeleportActor(AActor* ActorToTeleport) {
-	if (!destination) {
-		return;  // There is no destination portal, don't bother
-	}
-
-	FTransform EntityTransform = GetActorTransform();
-	FTransform ExitTransform = destination->spawnPoint->GetComponentTransform();
-
-	FTransform RelativeTransform = ActorToTeleport->GetActorTransform().GetRelativeTransform(EntityTransform);
-
-	FTransform NewTransform = RelativeTransform * ExitTransform;
-
-	ActorToTeleport->SetActorTransform(NewTransform);
-	FRotator rotation = destination->spawnPoint->GetComponentRotation();
-	//ActorToTeleport->SetActorRotation(rotation);
-	ATeamCubeCharacter* ch = Cast<ATeamCubeCharacter>(ActorToTeleport);
 	
 
+	if (!destination || !ActorToTeleport)
+		return;
+
+	// Get destination transform
+	const FTransform DestTransform = destination->spawnPoint->GetComponentTransform();
+
+	// Teleport actor to destination position and rotation
+	ActorToTeleport->SetActorLocation(DestTransform.GetLocation());
+	//ActorToTeleport->SetActorRotation(DestTransform.GetRotation());
+
+	// Optional: handle velocity and camera for characters
 	ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
-	if (Character) {
-		FVector LocalVelocity = EntityTransform.InverseTransformVectorNoScale(Character->GetVelocity());
-		FVector NewVelocity = ExitTransform.TransformVectorNoScale(LocalVelocity);
+	if (Character)
+	{
+		UCharacterMovementComponent* MoveComp = Character->GetCharacterMovement();
+		Character->SetActorRotation(destination->spawnPoint->GetComponentRotation());
+		Character->GetCapsuleComponent()->SetWorldRotation(destination->spawnPoint->GetComponentRotation());
+		if (MoveComp)
+		{
+			// Transform velocity relative to portal orientation
+			FVector OldVelocity = MoveComp->Velocity;
+			FVector NewVelocity = destination->spawnPoint->GetComponentRotation().RotateVector(OldVelocity);
+			MoveComp->Velocity = NewVelocity;
+		}
 
-		Character->GetCharacterMovement()->Velocity = NewVelocity;
-
+		// Update player control rotation
 		APlayerController* PC = Cast<APlayerController>(Character->GetController());
 		if (PC)
 		{
-			
-
-			FRotator TargetRot = destination->spawnPoint->GetComponentRotation();
-
-			
-			//TargetRot.Roll = 0.f;
-
-			PC->SetControlRotation(TargetRot);
+			PC->SetControlRotation(DestTransform.Rotator());
 			Character->SetActorRotation(PC->GetControlRotation());
-
 		}
 	}
 
-	if (ch) {
-		ch->UpdateCamera(destination->spawnPoint->GetComponentRotation());
+	// If it’s your custom TeamCubeCharacter, update camera manually
+	if (ATeamCubeCharacter* CubeChar = Cast<ATeamCubeCharacter>(ActorToTeleport))
+	{
+		CubeChar->UpdateCamera(DestTransform.Rotator());
 	}
+
+	//FTransform EntityTransform = GetActorTransform();
+	//FTransform ExitTransform = destination->spawnPoint->GetComponentTransform();
+
+	//FTransform RelativeTransform = ActorToTeleport->GetActorTransform().GetRelativeTransform(EntityTransform);
+
+	//FTransform NewTransform = RelativeTransform * ExitTransform;
+
+	//ActorToTeleport->SetActorTransform(NewTransform);
+	//FRotator rotation = destination->spawnPoint->GetComponentRotation();
+	////ActorToTeleport->SetActorRotation(rotation);
+	//ATeamCubeCharacter* ch = Cast<ATeamCubeCharacter>(ActorToTeleport);
+	//
+
+	//ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
+	//if (Character) {
+	//	FVector LocalVelocity = EntityTransform.InverseTransformVectorNoScale(Character->GetVelocity());
+	//	FVector NewVelocity = ExitTransform.TransformVectorNoScale(LocalVelocity);
+
+	//	Character->GetCharacterMovement()->Velocity = NewVelocity;
+
+	//	APlayerController* PC = Cast<APlayerController>(Character->GetController());
+	//	if (PC)
+	//	{
+	//		
+
+	//		FRotator TargetRot = destination->spawnPoint->GetComponentRotation();
+
+	//		
+	//		//TargetRot.Roll = 0.f;
+
+	//		PC->SetControlRotation(TargetRot);
+	//		Character->SetActorRotation(PC->GetControlRotation());
+
+	//	}
+	//}
+
+	//if (ch) {
+	//	ch->UpdateCamera(destination->spawnPoint->GetComponentRotation());
+	//}
 
 	
 }

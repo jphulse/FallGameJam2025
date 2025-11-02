@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dbe8uq6oo1e0u"]
+[gd_scene load_steps=9 format=3 uid="uid://dbe8uq6oo1e0u"]
 
 [ext_resource type="PackedScene" uid="uid://npefb815sqnh" path="res://scenes/Player/player.tscn" id="1_rvaov"]
 [ext_resource type="PackedScene" uid="uid://bn8lekmdh8wib" path="res://scenes/Actors/Portal.tscn" id="2_sj2c2"]
@@ -11,13 +11,12 @@
 
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_rvaov"]
 
+[sub_resource type="PlaneMesh" id="PlaneMesh_sj2c2"]
+
 [sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_sj2c2"]
 plane = Plane(1, 0, 0, 0)
 
 [node name="TestLevel" type="Node3D"]
-
-[node name="Player" parent="." instance=ExtResource("1_rvaov")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4704138, 1.1198802, 6.2733693)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9.441914)
@@ -38,6 +37,10 @@ mesh = SubResource("PlaneMesh_rvaov")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("WorldBoundaryShape3D_rvaov")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+transform = Transform3D(9.708969, 0, 0, 0, 1, 0, 0, 0, 10.043931, 0, 0, 0)
+mesh = SubResource("PlaneMesh_sj2c2")
+
 [node name="Wall" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.704042, 0, 0)
 
@@ -53,3 +56,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7719193, 0.33532047, -7.85
 
 [node name="Portal3" parent="." instance=ExtResource("2_sj2c2")]
 transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -18.12739, 3.45117, 0)
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("1_rvaov")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4704138, 1.1198802, 6.2733693)

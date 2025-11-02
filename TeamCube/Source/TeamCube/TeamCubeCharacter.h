@@ -84,6 +84,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float CameraOffset = 64.f;
 
+	UPROPERTY(EditAnywhere, Category = "Jumping")
+	float JumpStrength = 600.f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* CameraRoot;
 
