@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://dbe8uq6oo1e0u"]
+
+[ext_resource type="PackedScene" uid="uid://npefb815sqnh" path="res://scenes/Player/player.tscn" id="1_rvaov"]
+[ext_resource type="PackedScene" uid="uid://bn8lekmdh8wib" path="res://scenes/Actors/Portal.tscn" id="2_sj2c2"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_sj2c2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rvaov"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_rvaov"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_rvaov"]
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_sj2c2"]
+plane = Plane(1, 0, 0, 0)
+
+[node name="TestLevel" type="Node3D"]
+
+[node name="Player" parent="." instance=ExtResource("1_rvaov")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4704138, 1.1198802, 6.2733693)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9.441914)
+mesh = SubResource("BoxMesh_sj2c2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+shape = SubResource("BoxShape3D_rvaov")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -0.70724404, -0.42985272)
+visible = false
+mesh = SubResource("PlaneMesh_rvaov")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("WorldBoundaryShape3D_rvaov")
+
+[node name="Wall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.704042, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Wall"]
+shape = SubResource("WorldBoundaryShape3D_sj2c2")
+
+[node name="Portal" parent="." node_paths=PackedStringArray("destination") instance=ExtResource("2_sj2c2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9306912, 0.5767547, 0)
+destination = NodePath("../Portal3")
+
+[node name="Portal2" parent="." instance=ExtResource("2_sj2c2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7719193, 0.33532047, -7.8512506)
+
+[node name="Portal3" parent="." instance=ExtResource("2_sj2c2")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -18.12739, 3.45117, 0)

@@ -73,3 +73,75 @@ TeamCube/Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 TeamCube/DerivedDataCache/*
+
+# Godot metadata and import folders in all subprojects
+*/.godot/
+*/.import/
+
+# Godot-generated files
+*/*.import
+*/export.cfg
+*/export_presets.cfg
+
+# Local editor and layout configs
+*/editor_layout.cfg
+*/editor_settings-*.cfg
+
+# Mono / C# specific cache and build folders
+*/.mono/
+*/.vs/
+*/bin/
+*/obj/
+*/Properties/
+
+# Temporary and cache folders
+*/.godot/mono/temp/
+*/.godot/editor_settings/
+*/.godot/tmp_*/
+*/.godot/asset_cache/
+
+# Platform-specific export and build caches
+*/android/
+*/ios/
+*/.gradle/
+*/build/
+
+# ------------------------------------------------------------
+# OS / IDE / tooling junk
+# ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Build outputs
+build/
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+*.pdb
+*.zip
+*.tar.gz
+
+# Editor / Environment
+.vscode/
+.idea/
+.env
+.env.local
+*.code-workspace
+
+# ------------------------------------------------------------
+# Notes
+# ------------------------------------------------------------
+# Keep these under version control:
+#   */project.godot
+#   */icon.png or icon.svg
+#   Your scenes, scripts, and assets.
+#
+# This setup allows multiple Godot subprojects to coexist
+# under one repository root cleanly. Gitignore modified by chatGPT

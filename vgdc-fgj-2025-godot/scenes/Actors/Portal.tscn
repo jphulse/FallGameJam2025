@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://bn8lekmdh8wib"]
+
+[ext_resource type="Script" uid="uid://dxrnh53wmbpp5" path="res://Scripts/portal.gd" id="1_13kmp"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1bswa"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1bswa"]
+vertex_color_is_srgb = true
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_13kmp"]
+material = SubResource("StandardMaterial3D_1bswa")
+
+[node name="Portal" type="Area3D"]
+script = ExtResource("1_13kmp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_1bswa")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_13kmp")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
