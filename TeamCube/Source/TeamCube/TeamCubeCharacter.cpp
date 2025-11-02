@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "TeamCubeCharacter.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -14,6 +15,12 @@ ATeamCubeCharacter::ATeamCubeCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+	RootComponent = GetCapsuleComponent();
+
+	CameraRoot = CreateDefaultSubobject<USceneComponent>(TEXT("CameraRoot"));
+	CameraRoot->SetupAttachment(GetRootComponent());
+
+	
 	
 	// Create the first person mesh that will be viewed only by this character's owner
 	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("First Person Mesh"));
@@ -25,13 +32,14 @@ ATeamCubeCharacter::ATeamCubeCharacter()
 
 	// Create the Camera Component	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
-	FirstPersonCameraComponent->SetupAttachment(FirstPersonMesh, FName("head"));
-	FirstPersonCameraComponent->SetRelativeLocationAndRotation(FVector(-2.8f, 5.89f, 0.0f), FRotator(0.0f, 90.0f, -90.0f));
-	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->SetupAttachment(CameraRoot);
+	FirstPersonCameraComponent->SetRelativeLocationAndRotation(FVector(0.f, 0.f, CameraOffset), FRotator(0.f, 0.f, 0.f));
+	FirstPersonCameraComponent->bUsePawnControlRotation = false;
 	FirstPersonCameraComponent->bEnableFirstPersonFieldOfView = true;
 	FirstPersonCameraComponent->bEnableFirstPersonScale = true;
 	FirstPersonCameraComponent->FirstPersonFieldOfView = 70.0f;
 	FirstPersonCameraComponent->FirstPersonScale = 0.6f;
+	GetCharacterMovement()->GravityScale = 0.f; // Disable gravity
 
 	// configure the character comps
 	GetMesh()->SetOwnerNoSee(true);
@@ -91,9 +99,35 @@ void ATeamCubeCharacter::DoAim(float Yaw, float Pitch)
 {
 	if (GetController())
 	{
+
+		FRotator CharacterRotation = GetActorRotation();
+
+		// Build rotation axes relative to character orientation
+		FVector RightVector = CharacterRotation.RotateVector(FVector::RightVector);
+		FVector UpVector = CharacterRotation.RotateVector(FVector::UpVector);
+
+
+		
+		FQuat YawQuat(UpVector, FMath::DegreesToRadians(Yaw));
+		FQuat PitchQuat(RightVector, FMath::DegreesToRadians(Pitch)); 
+
+		// Combine rotations
+		FQuat NewRotationQuat = PitchQuat * YawQuat;
+
+		// Apply to controller rotation
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			FRotator NewControlRotation = (NewRotationQuat * PC->GetControlRotation().Quaternion()).Rotator();
+			PC->SetControlRotation(NewControlRotation);
+			//FRotator RelativeCameraRot = PC->GetControlRotation() - CharacterRotation;
+
+			//// Apply it to CameraRoot (or your camera component’s parent)
+			//CameraRoot->SetRelativeRotation(RelativeCameraRot);
+		}
 		// pass the rotation inputs
-		AddControllerYawInput(Yaw);
-		AddControllerPitchInput(Pitch);
+		/*AddControllerYawInput(Yaw);
+		AddControllerPitchInput(Pitch);*/
 	}
 }
 
@@ -101,6 +135,8 @@ void ATeamCubeCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController())
 	{
+
+
 		// pass the move inputs
 		AddMovementInput(GetActorRightVector(), Right);
 		AddMovementInput(GetActorForwardVector(), Forward);
@@ -118,3 +154,55 @@ void ATeamCubeCharacter::DoJumpEnd()
 	// pass StopJumping to the character
 	StopJumping();
 }
+
+void ATeamCubeCharacter::UpdateCamera(FRotator target)
+{
+	//FirstPersonCameraComponent->SetRelativeLocation(FVector::ZeroVector);
+	//target.Yaw += 180.f;
+
+	CameraRoot->SetWorldRotation(target);
+
+	// Get the player's world up vector
+	FVector PlayerUp = GetActorUpVector();
+
+	// Desired offset magnitude (e.g. 60 units above the head)
+	float OffsetDistance = CameraOffset;
+
+	// Offset vector in world space (above the player)
+	FVector WorldOffset = PlayerUp * OffsetDistance;
+
+	// Convert world offset to CameraRoot local space (relative)
+	FVector LocalOffset = CameraRoot->GetComponentTransform().InverseTransformVectorNoScale(WorldOffset);
+
+	// Set the relative location of the camera
+	FirstPersonCameraComponent->SetRelativeLocation(LocalOffset);
+
+	//FirstPersonCameraComponent->SetRelativeLocation(GetActorUpVector() * CameraOffset);
+	//FVector PlayerForward = GetActorForwardVector();
+	//FVector PlayerUp = GetActorUpVector();
+
+	//// Build a rotation that makes the camera's up match the player's up
+	//FRotator TargetCameraRotation = UKismetMathLibrary::MakeRotationFromAxes(
+	//	PlayerForward,
+	//	FVector::CrossProduct(PlayerUp, PlayerForward), // Right vector
+	//	PlayerUp
+	//);
+
+	//FirstPersonCameraComponent->SetWorldRotation(TargetCameraRotation);
+}
+
+void ATeamCubeCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	FVector down = -GetActorUpVector();
+	FVector gravity = down * gravityStrength * DeltaTime;
+
+	FVector currentVelocity = GetCharacterMovement()->Velocity;
+	currentVelocity += gravity;
+
+	GetCharacterMovement()->Velocity = currentVelocity;
+
+
+}
+

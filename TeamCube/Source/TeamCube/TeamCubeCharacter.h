@@ -52,6 +52,8 @@ protected:
 public:
 	ATeamCubeCharacter();
 
+	virtual void UpdateCamera(FRotator target);
+
 protected:
 
 	/** Called from Input Actions for movement input */
@@ -75,6 +77,19 @@ protected:
 	/** Handles jump end inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+
+	UPROPERTY(EditAnywhere, Category= "Physics")
+	float gravityStrength = 980;
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float CameraOffset = 64.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* CameraRoot;
+
+	virtual void Tick(float DeltaTime) override; 
+
+	
 
 protected:
 

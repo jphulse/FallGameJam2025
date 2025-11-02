@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PortalActor.h"
+#include "TeamCubeCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
@@ -57,6 +58,10 @@ void APortalActor::TeleportActor(AActor* ActorToTeleport) {
 	FTransform NewTransform = RelativeTransform * ExitTransform;
 
 	ActorToTeleport->SetActorTransform(NewTransform);
+	FRotator rotation = destination->spawnPoint->GetComponentRotation();
+	//ActorToTeleport->SetActorRotation(rotation);
+	ATeamCubeCharacter* ch = Cast<ATeamCubeCharacter>(ActorToTeleport);
+	
 
 	ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
 	if (Character) {
@@ -64,7 +69,28 @@ void APortalActor::TeleportActor(AActor* ActorToTeleport) {
 		FVector NewVelocity = ExitTransform.TransformVectorNoScale(LocalVelocity);
 
 		Character->GetCharacterMovement()->Velocity = NewVelocity;
+
+		APlayerController* PC = Cast<APlayerController>(Character->GetController());
+		if (PC)
+		{
+			
+
+			FRotator TargetRot = destination->spawnPoint->GetComponentRotation();
+
+			
+			//TargetRot.Roll = 0.f;
+
+			PC->SetControlRotation(TargetRot);
+			Character->SetActorRotation(PC->GetControlRotation());
+
+		}
 	}
+
+	if (ch) {
+		ch->UpdateCamera(destination->spawnPoint->GetComponentRotation());
+	}
+
+	
 }
 
 void APortalActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
