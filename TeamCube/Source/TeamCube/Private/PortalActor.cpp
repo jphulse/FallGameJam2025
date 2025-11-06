@@ -63,30 +63,31 @@ void APortalActor::TeleportActor(AActor* ActorToTeleport) {
 	ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
 	if (Character)
 	{
-		UCharacterMovementComponent* MoveComp = Character->GetCharacterMovement();
+		/*UCharacterMovementComponent* MoveComp = Character->GetCharacterMovement();
 		Character->SetActorRotation(destination->spawnPoint->GetComponentRotation());
-		Character->GetCapsuleComponent()->SetWorldRotation(destination->spawnPoint->GetComponentRotation());
-		if (MoveComp)
-		{
-			// Transform velocity relative to portal orientation
-			FVector OldVelocity = MoveComp->Velocity;
-			FVector NewVelocity = destination->spawnPoint->GetComponentRotation().RotateVector(OldVelocity);
-			MoveComp->Velocity = NewVelocity;
-		}
+		Character->GetCapsuleComponent()->SetWorldRotation(destination->spawnPoint->GetComponentRotation());*/
+		//if (MoveComp)
+		//{
+		//	// Transform velocity relative to portal orientation
+		//	FVector OldVelocity = MoveComp->Velocity;
+		//	FVector NewVelocity = destination->spawnPoint->GetComponentRotation().RotateVector(OldVelocity);
+		//	MoveComp->Velocity = NewVelocity;
+		//}
 
 		// Update player control rotation
 		APlayerController* PC = Cast<APlayerController>(Character->GetController());
 		if (PC)
 		{
-			PC->SetControlRotation(DestTransform.Rotator());
-			Character->SetActorRotation(PC->GetControlRotation());
+			/*PC->SetControlRotation(DestTransform.Rotator());
+			Character->SetActorRotation(PC->GetControlRotation());*/
 		}
 	}
 
 	// If it’s your custom TeamCubeCharacter, update camera manually
 	if (ATeamCubeCharacter* CubeChar = Cast<ATeamCubeCharacter>(ActorToTeleport))
 	{
-		CubeChar->UpdateCamera(DestTransform.Rotator());
+		/*CubeChar->UpdateCamera(DestTransform.Rotator());*/
+		CubeChar->setGravityDirection(destination->gravityDownDirection);
 	}
 
 	//FTransform EntityTransform = GetActorTransform();

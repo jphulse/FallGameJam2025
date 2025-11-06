@@ -7,7 +7,7 @@ const JUMP_VELOCITY = 4.5
 @onready
 var portalCooldown = $TeleportCoolDown
 var canTeleport = true
-var mouseSensitivity : float = 40
+var mouseSensitivity : float = .2
 var deltaInput : float = 0
 
 
@@ -21,7 +21,7 @@ func teleportPlayer(destination: Portal):
 		
 		rotation_degrees.x = 0  # Prevent rolling
 		rotation_degrees.z = 0  # Prevent unwanted rotations
-		
+		#get_parent_node_3d().global_rotation = destination.global_rotation
 		global_transform = destination.global_transform
 		up_direction = -destination.global_transform.basis.y.normalized()
 		transform = destination.transform

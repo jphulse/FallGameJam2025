@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* spawnPoint;
+
+	UPROPERTY(EditAnywhere, Category = "Portal")
+	FVector gravityDownDirection;
 	
 public:	
 	// Sets default values for this actor's properties

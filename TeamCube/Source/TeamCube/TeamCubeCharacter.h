@@ -54,6 +54,8 @@ public:
 
 	virtual void UpdateCamera(FRotator target);
 
+	void setGravityDirection(FVector& grav);
+
 protected:
 
 	/** Called from Input Actions for movement input */

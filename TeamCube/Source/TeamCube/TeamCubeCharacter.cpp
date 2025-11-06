@@ -34,12 +34,12 @@ ATeamCubeCharacter::ATeamCubeCharacter()
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
 	FirstPersonCameraComponent->SetupAttachment(CameraRoot);
 	FirstPersonCameraComponent->SetRelativeLocationAndRotation(FVector(0.f, 0.f, CameraOffset), FRotator(0.f, 0.f, 0.f));
-	FirstPersonCameraComponent->bUsePawnControlRotation = false;
+	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	FirstPersonCameraComponent->bEnableFirstPersonFieldOfView = true;
 	FirstPersonCameraComponent->bEnableFirstPersonScale = true;
 	FirstPersonCameraComponent->FirstPersonFieldOfView = 70.0f;
 	FirstPersonCameraComponent->FirstPersonScale = 0.6f;
-	GetCharacterMovement()->GravityScale = 0.f; // Disable gravity
+	//GetCharacterMovement()->GravityScale = 0.f; // Disable gravity
 
 	// configure the character comps
 	GetMesh()->SetOwnerNoSee(true);
@@ -51,11 +51,29 @@ ATeamCubeCharacter::ATeamCubeCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
 
-	// New
+	//// New
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCapsuleComponent()->SetUsingAbsoluteRotation(true);
+	
 
+}
+void ATeamCubeCharacter::setGravityDirection(FVector& grav)
+{
+	GetCharacterMovement()->SetGravityDirection(grav);
+	FVector DesiredUp = -grav.GetSafeNormal();
+	FVector CurrentUp = GetActorUpVector();
+
+	// Compute rotation to align current up with desired up
+	FQuat RotationQuat = FQuat::FindBetweenNormals(CurrentUp, DesiredUp);
+	SetActorRotation(RotationQuat * GetActorQuat());
+
+	FVector Forward = GetActorForwardVector();
+	FVector Right = GetActorRightVector();
+	FVector Up = GetActorUpVector();
+
+	FRotator TargetRot = UKismetMathLibrary::MakeRotationFromAxes(Forward, Right, Up);
+	CameraRoot->SetWorldRotation(TargetRot);
 }
 
 void ATeamCubeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -103,38 +121,60 @@ void ATeamCubeCharacter::LookInput(const FInputActionValue& Value)
 
 void ATeamCubeCharacter::DoAim(float Yaw, float Pitch)
 {
-	if (GetController())
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
+		// Get current control rotation as a quaternion
+		FQuat ControlQuat = PC->GetControlRotation().Quaternion();
 
-		FRotator CharacterRotation = GetActorRotation();
+		// Get local axes relative to the character
+		const FVector LocalUp = GetActorUpVector();
+		const FVector LocalRight = GetActorRightVector();
 
-		// Build rotation axes relative to character orientation
-		FVector RightVector = CharacterRotation.RotateVector(FVector::RightVector);
-		FVector UpVector = CharacterRotation.RotateVector(FVector::UpVector);
+		// Apply yaw around character's up (so "turn left/right" follows gravity)
+		const FQuat YawQuat(LocalUp, FMath::DegreesToRadians(Yaw));
 
+		// Apply pitch around character's right (so "look up/down" follows gravity)
+		const FQuat PitchQuat(LocalRight, FMath::DegreesToRadians(Pitch));
 
-		
-		FQuat YawQuat(UpVector, FMath::DegreesToRadians(Yaw));
-		FQuat PitchQuat(RightVector, FMath::DegreesToRadians(Pitch)); 
+		// Combine (order matters: pitch then yaw)
+		FQuat NewQuat = YawQuat * PitchQuat * ControlQuat;
 
-		// Combine rotations
-		FQuat NewRotationQuat = PitchQuat * YawQuat;
-
-		// Apply to controller rotation
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		if (PC)
-		{
-			FRotator NewControlRotation = (NewRotationQuat * PC->GetControlRotation().Quaternion()).Rotator();
-			PC->SetControlRotation(NewControlRotation);
-			//FRotator RelativeCameraRot = PC->GetControlRotation() - CharacterRotation;
-
-			//// Apply it to CameraRoot (or your camera component’s parent)
-			//CameraRoot->SetRelativeRotation(RelativeCameraRot);
-		}
-		// pass the rotation inputs
-		/*AddControllerYawInput(Yaw);
-		AddControllerPitchInput(Pitch);*/
+		// Update controller rotation
+		PC->SetControlRotation(NewQuat.Rotator());
 	}
+	//if (GetController())
+	//{
+
+	//	FRotator CharacterRotation = GetActorRotation();
+
+	//	// Build rotation axes relative to character orientation
+	//	FVector RightVector = CharacterRotation.RotateVector(FVector::RightVector);
+	//	FVector UpVector = CharacterRotation.RotateVector(FVector::UpVector);
+
+
+	//	
+	//	FQuat YawQuat(UpVector, FMath::DegreesToRadians(Yaw));
+	//	FQuat PitchQuat(RightVector, FMath::DegreesToRadians(Pitch)); 
+
+	//	// Combine rotations
+	//	FQuat NewRotationQuat = PitchQuat * YawQuat;
+
+	//	// Apply to controller rotation
+	//	APlayerController* PC = Cast<APlayerController>(GetController());
+	//	if (PC)
+	//	{
+	//		FRotator NewControlRotation = (NewRotationQuat * PC->GetControlRotation().Quaternion()).Rotator();
+	//		PC->SetControlRotation(NewControlRotation);
+	//		//FRotator RelativeCameraRot = PC->GetControlRotation() - CharacterRotation;
+
+	//		//// Apply it to CameraRoot (or your camera component’s parent)
+	//		//CameraRoot->SetRelativeRotation(RelativeCameraRot);
+	//	}
+	//	// pass the rotation inputs
+	//	/*AddControllerYawInput(Yaw);
+	//	AddControllerPitchInput(Pitch);*/
+	//}
 }
 
 void ATeamCubeCharacter::DoMove(float Right, float Forward)
@@ -212,13 +252,13 @@ void ATeamCubeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector down = -GetActorUpVector();
-	FVector gravity = down * gravityStrength * DeltaTime;
+	//FVector down = -GetActorUpVector();
+	//FVector gravity = down * gravityStrength * DeltaTime;
 
-	FVector currentVelocity = GetCharacterMovement()->Velocity;
-	currentVelocity += gravity;
+	//FVector currentVelocity = GetCharacterMovement()->Velocity;
+	//currentVelocity += gravity;
 
-	GetCharacterMovement()->Velocity = currentVelocity;
+	//GetCharacterMovement()->Velocity = currentVelocity;
 
 
 }
