@@ -110,20 +110,6 @@ void ATeamCubeThirdPersonCharacter::DoMove(float Right, float Forward)
 		forward -= forwardResult;
 		forward.Normalize();
 		AddMovementInput(forward, Forward);
-		
-		// find out which way is forward
-		//const FRotator Rotation = GetController()->GetControlRotation();
-		//const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		//// get forward vector
-		//const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-		//// get right vector 
-		//const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		//// add movement 
-		//AddMovementInput(ForwardDirection, Forward);
-		//AddMovementInput(RightDirection, Right);
 	}
 }
 
