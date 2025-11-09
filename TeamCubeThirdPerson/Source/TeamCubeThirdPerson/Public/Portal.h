@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SplinePathActor.h"
+#include "Enemy.h"
 #include "Portal.generated.h"
 
 UCLASS()
@@ -23,6 +25,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Portal")
 	FVector gravityDownDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pathfollowing")
+	ASplinePathActor* splinePath;
+
+
+
 
 public:
 	// Sets default values for this actor's properties

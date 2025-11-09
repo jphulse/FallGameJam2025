@@ -24,9 +24,12 @@ APortal::APortal()
 	spawnPoint->SetupAttachment(RootComponent);
 
 	portalTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	portalTrigger->SetCollisionResponseToAllChannels(ECR_Ignore);
-	portalTrigger->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	portalTrigger->SetCollisionResponseToAllChannels(ECR_Overlap);
+	/*portalTrigger->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	portalTrigger->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	portalTrigger->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Overlap);*/
 	portalTrigger->OnComponentBeginOverlap.AddDynamic(this, &APortal::OnOverlapBegin);
+
 
 }
 
@@ -73,6 +76,17 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 			
 		}
 	}
+	AEnemy* enemy = Cast<AEnemy>(ActorToTeleport);
+	if (enemy) {
+		UE_LOG(LogTemp, Display, TEXT("Teleporting enemy"));
+		if (destination->splinePath) {
+			UE_LOG(LogTemp, Display, TEXT("Sent a spline over"));
+		}
+		enemy->splinePath = destination->splinePath;
+		enemy->pathInterrupt = true;
+		enemy->stopAllTimelines();
+		enemy->afterTeleport();
+	}
 
 	// If it�s your custom TeamCubeCharacter, update camera manually
 	if (ATeamCubeThirdPersonCharacter* CubeChar = Cast<ATeamCubeThirdPersonCharacter>(ActorToTeleport))
@@ -88,8 +102,8 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor && OtherActor != this)
+{	
+	if (OtherActor && OtherActor != this &&!Cast<ASplinePathActor>(OtherActor))
 	{
 		TeleportActor(OtherActor);
 	}
