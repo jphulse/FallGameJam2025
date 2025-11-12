@@ -67,10 +67,6 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 	// Get destination transform
 	
 
-	// Teleport actor to destination position and rotation
-	UE_LOG(LogTemp, Display, TEXT(" Destination %s"), *destination->GetActorLocation().ToString());
-	ActorToTeleport->SetActorLocation(destination->GetActorLocation());
-	UE_LOG(LogTemp, Display, TEXT("Player location %s"), *ActorToTeleport->GetActorLocation().ToString());
 	//ActorToTeleport->SetActorRotation(DestTransform.GetRotation());
 
 	// Optional: handle velocity and camera for characters
@@ -89,6 +85,7 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 	AEnemy* enemy = Cast<AEnemy>(ActorToTeleport);
 	if (enemy) {
 		UE_LOG(LogTemp, Display, TEXT("Teleporting enemy"));
+		ActorToTeleport->SetActorLocation(destination->GetActorLocation());
 		if (destination->splinePath) {
 			UE_LOG(LogTemp, Display, TEXT("Sent a spline over"));
 		}
@@ -103,12 +100,10 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 	// If it�s your custom TeamCubeCharacter, update camera manually
 	if (ATeamCubeThirdPersonCharacter* CubeChar = Cast<ATeamCubeThirdPersonCharacter>(ActorToTeleport))
 	{
-		
+		ActorToTeleport->SetActorLocation(destination->GetActorLocation());
 		CubeChar->GetCharacterMovement()->SetGravityDirection(destination->gravityDownDirection);
 
 	}
-
-
 }
 
 void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
