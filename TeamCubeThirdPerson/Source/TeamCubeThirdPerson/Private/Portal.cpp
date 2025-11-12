@@ -73,7 +73,7 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 		if (destination->splinePath) {
 			UE_LOG(LogTemp, Display, TEXT("Sent a spline over"));
 
-			ActorToTeleport->SetActorLocation(destination->GetActorLocation());
+			//ActorToTeleport->SetActorLocation(destination->GetActorLocation());
 			enemy->splinePath = destination->splinePath;
 			enemy->pathInterrupt = true;
 			enemy->stopAllTimelines();
