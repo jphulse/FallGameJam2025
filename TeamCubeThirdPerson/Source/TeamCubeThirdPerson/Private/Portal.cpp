@@ -64,25 +64,9 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 	if (!destination || !ActorToTeleport)
 		return;
 
-	// Get destination transform
 	
-
-	//ActorToTeleport->SetActorRotation(DestTransform.GetRotation());
-
-	// Optional: handle velocity and camera for characters
-	//ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
-	//if (Character)
-	//{
-	//	
-
-	//	// Update player control rotation
-	//	APlayerController* PC = Cast<APlayerController>(Character->GetController());
-	//	if (PC)
-	//	{
-	//		
-	//	}
-	//}
 	AEnemy* enemy = Cast<AEnemy>(ActorToTeleport);
+	// Enemies
 	if (enemy) {
 		UE_LOG(LogTemp, Display, TEXT("Teleporting enemy"));
 		ActorToTeleport->SetActorLocation(destination->GetActorLocation());
@@ -97,7 +81,7 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 
 
 
-	// If it�s your custom TeamCubeCharacter, update camera manually
+	// Player character for now nothing else should be able to teleport besides the two listed here
 	if (ATeamCubeThirdPersonCharacter* CubeChar = Cast<ATeamCubeThirdPersonCharacter>(ActorToTeleport))
 	{
 		ActorToTeleport->SetActorLocation(destination->GetActorLocation());
