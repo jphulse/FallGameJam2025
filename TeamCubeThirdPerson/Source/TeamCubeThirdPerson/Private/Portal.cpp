@@ -89,6 +89,7 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 	{
 		ActorToTeleport->SetActorLocation(destination->GetActorLocation());
 		CubeChar->GetCharacterMovement()->SetGravityDirection(destination->gravityDownDirection);
+		PortalTeleportPlayerSuccess();
 
 	}
 }
