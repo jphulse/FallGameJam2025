@@ -117,6 +117,8 @@ void ATeamCubeThirdPersonCharacter::DoLook(float Yaw, float Pitch)
 {
 	if (GetController() != nullptr)
 	{
+		GetCharacterMovement()->GetGravityDirection();
+
 		// add yaw and pitch input to controller
 		AddControllerYawInput(Yaw);
 		AddControllerPitchInput(Pitch);
