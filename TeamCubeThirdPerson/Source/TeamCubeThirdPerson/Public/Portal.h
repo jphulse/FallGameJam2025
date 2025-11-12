@@ -50,5 +50,21 @@ public:
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 		const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+
+	// adding custom event
+	UFUNCTION(BlueprintImplementableEvent, Category = "Custom Events")
+	void PortalTeleportPlayerSuccess();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Custom Events")
+	void UpdateVariableForTeleportPlayer();
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MyVariables")
+	bool canTeleportPlayer = true;
 
 };

@@ -29,6 +29,7 @@ APortal::APortal()
 	portalTrigger->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	portalTrigger->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Overlap);*/
 	portalTrigger->OnComponentBeginOverlap.AddDynamic(this, &APortal::OnOverlapBegin);
+	portalTrigger->OnComponentEndOverlap.AddDynamic(this, &APortal::OnOverlapEnd);
 
 
 }
@@ -49,6 +50,15 @@ void APortal::Tick(float DeltaTime)
 
 
 void APortal::TeleportActor(AActor* ActorToTeleport) {
+	ATeamCubeThirdPersonCharacter* non = Cast<ATeamCubeThirdPersonCharacter>(ActorToTeleport);
+	if (non) {
+		if (!canTeleportPlayer) { // so hacky XD
+			return;
+		}
+
+		destination->canTeleportPlayer = false;
+		
+	}
 
 
 	if (!destination || !ActorToTeleport)
@@ -64,18 +74,18 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 	//ActorToTeleport->SetActorRotation(DestTransform.GetRotation());
 
 	// Optional: handle velocity and camera for characters
-	ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
-	if (Character)
-	{
-		
+	//ACharacter* Character = Cast<ACharacter>(ActorToTeleport);
+	//if (Character)
+	//{
+	//	
 
-		// Update player control rotation
-		APlayerController* PC = Cast<APlayerController>(Character->GetController());
-		if (PC)
-		{
-			
-		}
-	}
+	//	// Update player control rotation
+	//	APlayerController* PC = Cast<APlayerController>(Character->GetController());
+	//	if (PC)
+	//	{
+	//		
+	//	}
+	//}
 	AEnemy* enemy = Cast<AEnemy>(ActorToTeleport);
 	if (enemy) {
 		UE_LOG(LogTemp, Display, TEXT("Teleporting enemy"));
@@ -88,12 +98,14 @@ void APortal::TeleportActor(AActor* ActorToTeleport) {
 		enemy->afterTeleport();
 	}
 
+
+
 	// If it�s your custom TeamCubeCharacter, update camera manually
 	if (ATeamCubeThirdPersonCharacter* CubeChar = Cast<ATeamCubeThirdPersonCharacter>(ActorToTeleport))
 	{
 		
 		CubeChar->GetCharacterMovement()->SetGravityDirection(destination->gravityDownDirection);
-			
+
 	}
 
 
@@ -109,5 +121,12 @@ void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 	}
 }
 
-
-
+void APortal::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor != this && Cast<ATeamCubeThirdPersonCharacter>(OtherActor))
+	{
+		canTeleportPlayer = true;
+		UpdateVariableForTeleportPlayer();
+	}
+}
